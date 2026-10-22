@@ -1,0 +1,18 @@
+# Blueprint do Render: no painel, New > Blueprint e aponte para este repositório.
+services:
+  - type: web
+    name: faz-telai
+    runtime: node
+    plan: free
+    # O build do site (Vite/TypeScript) precisa das devDependencies.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Preenchidos no painel do Render (sync: false = o valor não fica no repositório).
+      - key: CLOUDFLARE_TURN_KEY_ID
+        sync: false
+      - key: CLOUDFLARE_TURN_API_TOKEN
+        sync: false

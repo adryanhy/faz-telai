@@ -1,0 +1,25 @@
+{
+  "name": "faz-telai",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Compartilhamento de tela entre amigos, direto no navegador.",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w client"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "concurrently": "^10.0.6",
+    "typescript": "^7.0.2"
+  }
+}
