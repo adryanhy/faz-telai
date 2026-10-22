@@ -9,6 +9,19 @@ export function canShareScreen(): boolean {
 }
 
 /**
+ * Como conseguir som na captura, de acordo com o navegador/sistema.
+ * O suporte a áudio do getDisplayMedia varia muito e o navegador não explica nada sozinho.
+ */
+export function audioCaptureHint(): string {
+  const ua = navigator.userAgent;
+  if (/Firefox\//.test(ua)) return "O Firefox não compartilha áudio. Pra transmitir com som, use Chrome ou Edge.";
+  if (/Mac OS X|Macintosh/.test(ua)) {
+    return "No Mac, o som só vai junto ao compartilhar uma Aba do Chrome/Edge, com “Compartilhar áudio” marcado.";
+  }
+  return "O som só vai junto ao compartilhar a Tela inteira ou uma Aba, com “Compartilhar áudio” marcado. Janelas não levam som.";
+}
+
+/**
  * Embrulha um RTCPeerConnection e resolve um detalhe chato do WebRTC:
  * candidatos ICE podem chegar antes da descrição remota, e o navegador
  * recusa adicioná-los nessa hora. Então guardamos numa fila até poder.

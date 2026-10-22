@@ -51,6 +51,16 @@ export const MODE_LABELS: Record<ShareMode, { label: string; hint: string }> = {
   browser: { label: "Navegador", hint: "30fps, prioriza texto nítido" },
 };
 
+/**
+ * Áudio de jogo/música não é voz: sem isso o navegador pode tratar a captura como microfone
+ * e aplicar cancelamento de eco e supressão de ruído, que abafam ou cortam o som.
+ */
+export const DISPLAY_AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: false,
+  noiseSuppression: false,
+  autoGainControl: false,
+};
+
 /** Restrições de captura: "max" deixa o navegador reduzir a tela mantendo a proporção. */
 export function captureConstraints(profile: QualityProfile): MediaTrackConstraints {
   return {

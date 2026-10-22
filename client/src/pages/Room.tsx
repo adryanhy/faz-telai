@@ -12,6 +12,7 @@ import {
   Radio,
   TriangleAlert,
   Users,
+  VolumeX,
 } from "lucide-react";
 import { isValidRoomId, MAX_PARTICIPANTS, type JoinError } from "@faz-telai/shared";
 import { Avatar, BrandLink } from "../components/Brand";
@@ -20,7 +21,7 @@ import { ShareSettingsPanel } from "../components/ShareSettingsPanel";
 import { VideoTile } from "../components/VideoTile";
 import { useRoom, type RoomStatus } from "../hooks/useRoom";
 import { loadName, saveName } from "../lib/storage";
-import { canShareScreen } from "../lib/webrtc";
+import { audioCaptureHint, canShareScreen } from "../lib/webrtc";
 
 const ERROR_MESSAGES: Record<JoinError, string> = {
   "invalid-room": "Esse código de sala não é válido.",
@@ -151,6 +152,17 @@ export function Room() {
                     </button>
                   )}
                 </div>
+                {localStream && room.share.localAudioMissing && (
+                  <div className="notice" role="status">
+                    <VolumeX size={18} aria-hidden />
+                    <div>
+                      <p>
+                        <strong>Sua transmissão está sem som.</strong> {audioCaptureHint()}
+                      </p>
+                      <p className="muted small">Pra corrigir, clique em Parar e compartilhe de novo.</p>
+                    </div>
+                  </div>
+                )}
                 {shareError && (
                   <p className="error" role="alert">
                     <TriangleAlert size={16} aria-hidden />

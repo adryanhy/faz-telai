@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Gamepad2, Globe, Volume2, VolumeX } from "lucide-react";
+import { Gamepad2, Globe, Info, Volume2, VolumeX } from "lucide-react";
 import { MODE_LABELS, type ShareMode, type ShareResolution, type ShareSettings } from "../lib/quality";
+import { audioCaptureHint } from "../lib/webrtc";
 
 interface Props {
   settings: ShareSettings;
@@ -40,7 +41,7 @@ export function ShareSettingsPanel({ settings, sharing, onChange }: Props) {
           title={
             sharing
               ? "Pra mudar o áudio, pare e compartilhe de novo."
-              : "No Windows, funciona ao compartilhar a tela inteira ou uma aba."
+              : "Transmitir o som junto com a tela"
           }
           onClick={() => onChange({ audio: !settings.audio })}
         >
@@ -49,6 +50,12 @@ export function ShareSettingsPanel({ settings, sharing, onChange }: Props) {
         </button>
       </div>
       <p className="settings-hint">{MODE_LABELS[settings.mode].hint}</p>
+      {settings.audio && !sharing && (
+        <p className="settings-hint audio-hint">
+          <Info size={14} aria-hidden />
+          {audioCaptureHint()}
+        </p>
+      )}
     </div>
   );
 }

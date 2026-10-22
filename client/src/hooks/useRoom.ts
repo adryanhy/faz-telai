@@ -30,7 +30,7 @@ export interface RoomActions {
   unwatch: (sharerId: string) => void;
 }
 
-const EMPTY_SHARE: ShareSnapshot = { localStream: null, viewerIds: [], watching: {} };
+const EMPTY_SHARE: ShareSnapshot = { localStream: null, localAudioMissing: false, viewerIds: [], watching: {} };
 const INITIAL_STATE: RoomState = { status: { kind: "connecting" }, selfId: null, participants: [], share: EMPTY_SHARE };
 
 /**

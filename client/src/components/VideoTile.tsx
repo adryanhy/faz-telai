@@ -27,6 +27,7 @@ export function VideoTile({ label, stream, status, self = false, onClose, onRetr
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(self);
   const [fullscreen, setFullscreen] = useState(false);
+  const [soundBlocked, setSoundBlocked] = useState(false);
   const stats = useVideoStats(videoRef, status === "live");
 
   useEffect(() => {
@@ -35,13 +36,24 @@ export function VideoTile({ label, stream, status, self = false, onClose, onRetr
     video.srcObject = stream;
     if (!stream) return;
 
-    // Se o navegador bloquear autoplay com som, toca mudo e a pessoa liga o som no botão.
+    // Se o navegador bloquear autoplay com som, toca mudo e mostra um "Ativar som" bem visível.
     video.play().catch(() => {
       setMuted(true);
+      setSoundBlocked(true);
       video.muted = true;
       return video.play().catch(() => {});
     });
   }, [stream]);
+
+  function unmute() {
+    setMuted(false);
+    setSoundBlocked(false);
+    const video = videoRef.current;
+    if (video) {
+      video.muted = false;
+      video.play().catch(() => {});
+    }
+  }
 
   useEffect(() => {
     const video = videoRef.current;
@@ -62,7 +74,8 @@ export function VideoTile({ label, stream, status, self = false, onClose, onRetr
   }
 
   const overlay = OVERLAYS[status];
-  const hasAudio = !self && (stream?.getAudioTracks().length ?? 0) > 0;
+  const hasAudioTrack = (stream?.getAudioTracks().length ?? 0) > 0;
+  const hasAudio = !self && hasAudioTrack;
   const silent = muted || volume === 0;
 
   return (
@@ -83,9 +96,17 @@ export function VideoTile({ label, stream, status, self = false, onClose, onRetr
       )}
 
       <figcaption className="tile-top">
-        <span className="chip">
-          {status === "live" && <span className="live-dot" aria-hidden />}
-          {label}
+        <span className="row" style={{ gap: 6 }}>
+          <span className="chip">
+            {status === "live" && <span className="live-dot" aria-hidden />}
+            {label}
+          </span>
+          {status === "live" && !hasAudioTrack && (
+            <span className="chip chip-muted">
+              <VolumeX size={14} aria-hidden />
+              Sem áudio
+            </span>
+          )}
         </span>
         {onClose && (
           <button className="icon-btn" onClick={onClose} aria-label={`Parar de assistir ${label}`} title="Parar de assistir">
@@ -94,13 +115,20 @@ export function VideoTile({ label, stream, status, self = false, onClose, onRetr
         )}
       </figcaption>
 
+      {status === "live" && hasAudio && soundBlocked && (
+        <button className="btn btn-primary unmute" onClick={unmute} onDoubleClick={(e) => e.stopPropagation()}>
+          <Volume2 size={18} aria-hidden />
+          Ativar som
+        </button>
+      )}
+
       {status === "live" && (
         <div className="tile-controls" onDoubleClick={(e) => e.stopPropagation()}>
           {hasAudio && (
             <>
               <button
                 className="icon-btn"
-                onClick={() => setMuted((m) => !m)}
+                onClick={() => (silent ? unmute() : setMuted(true))}
                 aria-label={silent ? "Ligar som" : "Desligar som"}
                 aria-pressed={silent}
               >

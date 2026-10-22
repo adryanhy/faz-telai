@@ -1067,3 +1067,52 @@ svg {
     padding: 6px;
   }
 }
+
+/* ---------- Avisos ---------- */
+
+.audio-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 60ch;
+}
+
+.audio-hint svg {
+  margin-top: 3px;
+}
+
+.notice {
+  flex-basis: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  font-size: 0.9375rem;
+  color: var(--text);
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--radius);
+}
+
+.notice > svg {
+  margin-top: 2px;
+  color: var(--warning);
+}
+
+.notice p + p {
+  margin-top: 2px;
+}
+
+.unmute {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  z-index: var(--z-overlay);
+  /* "translate" separado, pra não brigar com o transform da animação de entrada */
+  translate: -50% 0;
+  animation: rise var(--dur-slow) var(--ease-out) both;
+}
+
+.chip-muted {
+  color: var(--text-muted);
+}

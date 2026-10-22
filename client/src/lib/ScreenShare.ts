@@ -11,6 +11,7 @@ import type {
 import {
   applySenderProfile,
   captureConstraints,
+  DISPLAY_AUDIO_CONSTRAINTS,
   DEFAULT_SETTINGS,
   getProfile,
   type QualityProfile,
@@ -33,6 +34,8 @@ export interface WatchState {
 
 export interface ShareSnapshot {
   localStream: MediaStream | null;
+  /** Pedimos áudio, mas o navegador entregou só vídeo. */
+  localAudioMissing: boolean;
   /** Ids de quem está assistindo a nossa tela. */
   viewerIds: string[];
   /** Telas que estamos assistindo, por id de quem compartilha. */
@@ -49,6 +52,7 @@ export interface ShareSnapshot {
  */
 export class ScreenShare {
   private localStream: MediaStream | null = null;
+  private audioMissing = false;
   private profile: QualityProfile = getProfile(DEFAULT_SETTINGS);
   private iceServers: IceServer[] = FALLBACK_ICE_SERVERS;
   private outgoing = new Map<string, Peer>();
@@ -78,11 +82,15 @@ export class ScreenShare {
     // Campos que só o Chrome/Edge entendem ficam fora dos tipos padrão do DOM.
     const options: DisplayMediaStreamOptions & Record<string, unknown> = {
       video: captureConstraints(this.profile),
-      audio: settings.audio,
+      audio: settings.audio ? DISPLAY_AUDIO_CONSTRAINTS : false,
       selfBrowserSurface: "exclude", // não deixa compartilhar a própria aba (efeito espelho infinito)
       systemAudio: settings.audio ? "include" : "exclude",
     };
     const stream = await navigator.mediaDevices.getDisplayMedia(options);
+
+    // Pedir áudio não garante receber: janela no Windows, Firefox e Mac costumam vir só com vídeo,
+    // e o navegador não avisa. Guardamos isso pra interface alertar quem está compartilhando.
+    this.audioMissing = settings.audio && stream.getAudioTracks().length === 0;
 
     const videoTrack = stream.getVideoTracks()[0];
     if (videoTrack) {
@@ -117,6 +125,7 @@ export class ScreenShare {
 
     for (const track of this.localStream.getTracks()) track.stop();
     this.localStream = null;
+    this.audioMissing = false;
     for (const viewerId of [...this.outgoing.keys()]) this.closeOutgoing(viewerId);
     this.socket.emit("share:stop");
     this.notify();
@@ -308,6 +317,7 @@ export class ScreenShare {
   private notify() {
     this.onChange({
       localStream: this.localStream,
+      localAudioMissing: this.audioMissing,
       viewerIds: [...this.outgoing.keys()],
       watching: Object.fromEntries(this.watching),
     });
