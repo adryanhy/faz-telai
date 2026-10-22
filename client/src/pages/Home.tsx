@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
+import { Gauge, LogIn, MousePointerClick, Plus, ShieldCheck, TriangleAlert } from "lucide-react";
+import { Logo } from "../components/Brand";
 import { generateRoomId, parseRoomInput } from "../lib/roomId";
 
 export function Home() {
@@ -15,38 +17,75 @@ export function Home() {
   }
 
   return (
-    <main className="page narrow stack-lg">
+    <main className="home">
       <header className="hero">
-        <h1>
-          Faz tel<span className="accent">ai</span> 📺
+        <Logo large />
+        <h1 className="hero-title">
+          Faz tel<span className="accent">ai</span>
         </h1>
-        <p className="muted">App anti-janja</p>
+        <p className="hero-tagline">App anti-janja</p>
       </header>
 
-      <section className="card stack">
-        <h2>Nova sala</h2>
-        <p className="muted">Crie uma sala e manda o link</p>
-        <button className="primary" onClick={() => navigate(`/sala/${generateRoomId()}`)}>
-          Criar sala
-        </button>
+      <section className="card home-card">
+        <div className="stack">
+          <h2>Nova sala</h2>
+          <p className="muted">Crie uma sala e manda o link</p>
+          <button className="btn btn-primary btn-lg btn-block" onClick={() => navigate(`/sala/${generateRoomId()}`)}>
+            <Plus size={20} aria-hidden />
+            Criar sala
+          </button>
+        </div>
+
+        <div className="divider" aria-hidden>
+          ou
+        </div>
+
+        <form className="stack" onSubmit={handleJoin} noValidate>
+          <label className="field-label" htmlFor="room-code">
+            Entrar numa sala
+          </label>
+          <div className="input-row">
+            <input
+              id="room-code"
+              className="input"
+              value={code}
+              placeholder="Link ou código"
+              autoComplete="off"
+              aria-invalid={invalid}
+              aria-describedby={invalid ? "room-code-error" : undefined}
+              onChange={(e) => {
+                setCode(e.target.value);
+                setInvalid(false);
+              }}
+            />
+            <button type="submit" className="btn" disabled={!code.trim()}>
+              <LogIn size={18} aria-hidden />
+              Entrar
+            </button>
+          </div>
+          {invalid && (
+            <p id="room-code-error" className="error">
+              <TriangleAlert size={16} aria-hidden />
+              Link ou código inválido. Cole o link inteiro ou algo como capivara-turbo-k7q2.
+            </p>
+          )}
+        </form>
       </section>
 
-      <form className="card stack" onSubmit={handleJoin}>
-        <h2>Entrar numa sala</h2>
-        <input
-          value={code}
-          placeholder="Cole o link ou o código (ex.: capivara-turbo-k7q2)"
-          aria-invalid={invalid}
-          onChange={(e) => {
-            setCode(e.target.value);
-            setInvalid(false);
-          }}
-        />
-        {invalid && <p className="error">Link ou código inválido.</p>}
-        <button type="submit" disabled={!code.trim()}>
-          Entrar
-        </button>
-      </form>
+      <ul className="features">
+        <li>
+          <MousePointerClick size={20} aria-hidden />
+          Sem instalar nada
+        </li>
+        <li>
+          <Gauge size={20} aria-hidden />
+          Até 1080p a 60fps
+        </li>
+        <li>
+          <ShieldCheck size={20} aria-hidden />
+          Direto entre vocês
+        </li>
+      </ul>
     </main>
   );
 }

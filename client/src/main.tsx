@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { Home } from "./pages/Home";
 import { Room } from "./pages/Room";
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/dm-sans";
 import "./styles.css";
 
 createRoot(document.getElementById("root")!).render(

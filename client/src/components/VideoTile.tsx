@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { LoaderCircle, Maximize2, Minimize2, MonitorPause, RefreshCw, Volume2, VolumeX, WifiOff, X } from "lucide-react";
 import type { WatchStatus } from "../lib/ScreenShare";
 
 interface Props {
@@ -11,10 +12,13 @@ interface Props {
   onRetry?: () => void;
 }
 
-const OVERLAY_TEXT: Partial<Record<WatchStatus, string>> = {
-  connecting: "Conectando…",
-  paused: "Parou de compartilhar. Volta sozinho se recomeçar.",
-  failed: "Não deu pra conectar.",
+const OVERLAYS: Partial<Record<WatchStatus, { icon: ReactNode; text: string }>> = {
+  connecting: { icon: <LoaderCircle size={28} className="spin" aria-hidden />, text: "Conectando…" },
+  paused: {
+    icon: <MonitorPause size={28} aria-hidden />,
+    text: "Parou de compartilhar. Volta sozinho se recomeçar.",
+  },
+  failed: { icon: <WifiOff size={28} aria-hidden />, text: "Não deu pra conectar." },
 };
 
 export function VideoTile({ label, stream, status, self = false, onClose, onRetry }: Props) {
@@ -57,36 +61,50 @@ export function VideoTile({ label, stream, status, self = false, onClose, onRetr
     else tileRef.current?.requestFullscreen().catch(() => {});
   }
 
-  const overlay = OVERLAY_TEXT[status];
+  const overlay = OVERLAYS[status];
   const hasAudio = !self && (stream?.getAudioTracks().length ?? 0) > 0;
+  const silent = muted || volume === 0;
 
   return (
     <figure ref={tileRef} className="tile" onDoubleClick={toggleFullscreen}>
       <video ref={videoRef} autoPlay playsInline muted={muted} />
+
       {overlay && (
         <div className="tile-overlay">
-          <p>{overlay}</p>
-          {status === "failed" && onRetry && <button onClick={onRetry}>Tentar de novo</button>}
+          {overlay.icon}
+          <p>{overlay.text}</p>
+          {status === "failed" && onRetry && (
+            <button className="btn btn-sm" onClick={onRetry}>
+              <RefreshCw size={16} aria-hidden />
+              Tentar de novo
+            </button>
+          )}
         </div>
       )}
-      <figcaption className="tile-caption">
-        <span>{label}</span>
+
+      <figcaption className="tile-top">
+        <span className="chip">
+          {status === "live" && <span className="live-dot" aria-hidden />}
+          {label}
+        </span>
         {onClose && (
-          <button className="tile-button" onClick={onClose} aria-label={`Parar de assistir ${label}`}>
-            ✕
+          <button className="icon-btn" onClick={onClose} aria-label={`Parar de assistir ${label}`} title="Parar de assistir">
+            <X size={18} aria-hidden />
           </button>
         )}
       </figcaption>
+
       {status === "live" && (
         <div className="tile-controls" onDoubleClick={(e) => e.stopPropagation()}>
           {hasAudio && (
             <>
               <button
-                className="tile-button"
+                className="icon-btn"
                 onClick={() => setMuted((m) => !m)}
-                aria-label={muted ? "Ligar som" : "Desligar som"}
+                aria-label={silent ? "Ligar som" : "Desligar som"}
+                aria-pressed={silent}
               >
-                {muted || volume === 0 ? "🔇" : "🔊"}
+                {silent ? <VolumeX size={18} aria-hidden /> : <Volume2 size={18} aria-hidden />}
               </button>
               <input
                 className="volume"
@@ -105,11 +123,12 @@ export function VideoTile({ label, stream, status, self = false, onClose, onRetr
           )}
           {stats && <span className="tile-stats">{stats}</span>}
           <button
-            className="tile-button push-right"
+            className="icon-btn push-right"
             onClick={toggleFullscreen}
             aria-label={fullscreen ? "Sair da tela cheia" : "Tela cheia"}
+            title={fullscreen ? "Sair da tela cheia" : "Tela cheia (ou duplo clique)"}
           >
-            {fullscreen ? "Sair" : "⛶"}
+            {fullscreen ? <Minimize2 size={18} aria-hidden /> : <Maximize2 size={18} aria-hidden />}
           </button>
         </div>
       )}
