@@ -8,6 +8,8 @@ services:
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /health
+    # Só publica depois que o pipeline de testes (GitHub Actions) passar.
+    autoDeployTrigger: checksPass
     envVars:
       - key: NODE_VERSION
         value: "22"

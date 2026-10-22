@@ -26,6 +26,27 @@ Para testar com TURN localmente, copie `.env.example` para `.env` e preencha as 
 - `npm run build` – gera o site em `client/dist`
 - `npm start` – sobe o servidor, que também entrega o site buildado (produção)
 
+## Testes
+
+```bash
+npm run check
+```
+
+Roda tudo que o pipeline roda, na mesma ordem:
+
+- `npm run typecheck` – tipos do servidor, do cliente e dos testes E2E
+- `npm test` – testes unitários e de integração (Vitest). O servidor sobe de verdade numa porta aleatória e os testes conversam com ele pelo Socket.io. `npm run test:watch` roda em modo observação enquanto você programa.
+- `npm run test:e2e` – testes de ponta a ponta (Playwright). Sobe o app buildado e abre duas "pessoas" no Chromium, que entram na sala, compartilham e assistem. O seletor de tela não dá pra automatizar, então os testes usam uma tela falsa (canvas animado + tom de áudio); todo o resto roda de verdade. Na primeira vez, instale o navegador com `npx playwright install chromium`.
+
+Onde fica cada teste:
+
+- `shared/src/*.test.ts`, `client/src/lib/*.test.ts`, `server/src/*.test.ts` – unitários e integração, ao lado do código testado
+- `e2e/*.spec.ts` – ponta a ponta
+
+### Pipeline (GitHub Actions)
+
+`.github/workflows/ci.yml` roda a checagem completa em todo push na `main` e em todo pull request. O Render só publica uma versão nova depois que o pipeline passa (`autoDeployTrigger: checksPass` no `render.yaml`). Se algum teste falhar, o site continua na versão anterior, e o relatório do Playwright fica salvo nos artefatos da execução.
+
 ## Deploy (Render, plano gratuito)
 
 1. Suba o repositório pro GitHub.
